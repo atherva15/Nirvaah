@@ -4,22 +4,26 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsc tests/engine-verification.ts tests/document-extract.test.ts tests/e2e-workflow.test.ts --outDir .tmp-test --module commonjs --target es2020 --moduleResolution node --esModuleInterop --skipLibCheck && node .tmp-test/tests/engine-verification.js && node .tmp-test/tests/document-extract.test.js && node .tmp-test/tests/e2e-workflow.test.js"
   },
   "dependencies": {
+    "@google/genai": "^3.6.1",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "postcss": "^8.5.33",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }

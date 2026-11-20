@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Nirvaah — Adaptive Business Operations",
-  description: "Your business. A clearer way forward.",
+  description: "An adaptive business operations workspace that transforms to what your business needs.",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-surface-0 text-text-primary font-sans">
+      <body className="min-h-full flex flex-col bg-porcelain text-ink font-sans selection:bg-lavender-light">
         {children}
       </body>
     </html>

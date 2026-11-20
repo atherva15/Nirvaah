@@ -4,14 +4,18 @@ import React from 'react';
 import { TaskPreset } from '../types';
 
 interface AppShellProps {
-  currentPreset: TaskPreset;
-  onSelectPreset: (preset: TaskPreset) => void;
+  currentPreset?: TaskPreset | null;
+  onSelectPreset?: (preset: TaskPreset) => void;
+  onResetToInitial?: () => void;
+  isInitialScreen?: boolean;
   children: React.ReactNode;
 }
 
 export default function AppShell({
   currentPreset,
   onSelectPreset,
+  onResetToInitial,
+  isInitialScreen = false,
   children,
 }: AppShellProps) {
   return (
@@ -22,8 +26,13 @@ export default function AppShell({
           <div className="flex items-center justify-between h-16">
             {/* Logo and Wordmark */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white shadow-xs">
+              <button
+                type="button"
+                onClick={onResetToInitial}
+                className="flex items-center gap-2.5 text-left group transition cursor-pointer"
+                title="Return to Task Selection"
+              >
+                <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
                   {/* Clean SVG Mark */}
                   <svg
                     className="w-4 h-4 text-white"
@@ -40,14 +49,14 @@ export default function AppShell({
                   </svg>
                 </div>
                 <div>
-                  <span className="text-lg font-bold tracking-tight text-text-primary">
+                  <span className="text-lg font-bold tracking-tight text-text-primary group-hover:text-brand transition-colors">
                     NIRVAAH
                   </span>
                   <span className="hidden sm:inline-block ml-2 text-xs font-medium text-text-muted">
                     Operations Cockpit
                   </span>
                 </div>
-              </div>
+              </button>
 
               {/* Workspace Badge */}
               <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-2 text-xs text-text-secondary border border-border">
@@ -92,67 +101,69 @@ export default function AppShell({
             </div>
           </div>
 
-          {/* Preset Navigation Tabs */}
-          <nav
-            aria-label="Workspace views"
-            className="flex space-x-1 sm:space-x-4 border-t border-border pt-1"
-          >
-            <button
-              type="button"
-              onClick={() => onSelectPreset('triage_queue')}
-              className={`py-3 px-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                currentPreset === 'triage_queue'
-                  ? 'border-brand text-brand font-semibold'
-                  : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
-              }`}
+          {/* Preset Navigation Tabs (only shown once inside adapted workspace) */}
+          {!isInitialScreen && onSelectPreset && (
+            <nav
+              aria-label="Workspace views"
+              className="flex space-x-1 sm:space-x-4 border-t border-border pt-1"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
+              <button
+                type="button"
+                onClick={() => onSelectPreset('triage_queue')}
+                className={`py-3 px-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+                  currentPreset === 'triage_queue'
+                    ? 'border-brand text-brand font-semibold'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                />
-              </svg>
-              <span>Triage Queue</span>
-              <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-brand-light text-brand font-mono font-medium">
-                P0
-              </span>
-            </button>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                  />
+                </svg>
+                <span>Triage Queue</span>
+                <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-brand-light text-brand font-mono font-medium">
+                  P0
+                </span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => onSelectPreset('exposure_summary')}
-              className={`py-3 px-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                currentPreset === 'exposure_summary'
-                  ? 'border-brand text-brand font-semibold'
-                  : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
-              }`}
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
+              <button
+                type="button"
+                onClick={() => onSelectPreset('exposure_summary')}
+                className={`py-3 px-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+                  currentPreset === 'exposure_summary'
+                    ? 'border-brand text-brand font-semibold'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"
-                />
-              </svg>
-              <span>Exposure Summary</span>
-              <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-surface-2 text-text-secondary font-mono font-medium">
-                P0
-              </span>
-            </button>
-          </nav>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"
+                  />
+                </svg>
+                <span>Exposure Summary</span>
+                <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-surface-2 text-text-secondary font-mono font-medium">
+                  P0
+                </span>
+              </button>
+            </nav>
+          )}
         </div>
       </header>
 

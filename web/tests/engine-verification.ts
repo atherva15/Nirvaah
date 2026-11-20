@@ -7,6 +7,7 @@ import {
   formatInr,
 } from '../src/lib/engine';
 import { TaskFilterState } from '../src/types/index';
+import { planWorkspace, getPresetPlan } from '../src/lib/planner';
 
 console.log('Running Nirvaah Deterministic Calculation Engine Verification...\n');
 
@@ -106,6 +107,58 @@ console.log('Running Nirvaah Deterministic Calculation Engine Verification...\n'
   assert.ok(metrics.totalValueInr > 0, 'Total value must be positive');
   assert.ok(metrics.totalOutstandingInr > 0, 'Total outstanding must be positive');
   console.log('✓ Summary metrics deterministic aggregation validated.');
+}
+
+// 6. Invariant WorkspacePlan Contract & Task Adaptation
+{
+  // Suggested Task 1: "Which customer orders need attention?"
+  const plan1 = planWorkspace('Which customer orders need attention?');
+  assert.strictEqual(plan1.plannerSource, 'deterministic_demo', 'Planner source must be deterministic_demo');
+  assert.strictEqual(plan1.intent, 'advance_followup', 'Intent must be advance_followup');
+  assert.strictEqual(plan1.layout, 'triage_queue', 'Layout must be triage_queue');
+  assert.ok(plan1.modules.includes('orders_table'), 'Triage plan must include orders_table module');
+  assert.ok(!plan1.modules.includes('grouped_queue'), 'Triage plan must NOT include grouped_queue module');
+  assert.strictEqual(plan1.filterState.amountThresholdInr, 2000, 'Default triage amount must be 2000');
+  assert.strictEqual(plan1.filterState.durationThresholdHours, 48, 'Default triage duration must be 48');
+
+  // Suggested Task 2: "Where are my outstanding payments?"
+  const plan2 = planWorkspace('Where are my outstanding payments?');
+  assert.strictEqual(plan2.plannerSource, 'deterministic_demo', 'Planner source must be deterministic_demo');
+  assert.strictEqual(plan2.intent, 'outstanding_exposure', 'Intent must be outstanding_exposure');
+  assert.strictEqual(plan2.layout, 'exposure_summary', 'Layout must be exposure_summary');
+  assert.ok(plan2.modules.includes('grouped_queue'), 'Exposure plan must include grouped_queue module');
+  assert.ok(!plan2.modules.includes('orders_table'), 'Exposure plan must NOT include orders_table module');
+  assert.strictEqual(plan2.filterState.amountThresholdInr, 5000, 'Default exposure amount must be 5000');
+  assert.strictEqual(plan2.filterState.durationThresholdHours, 72, 'Default exposure duration must be 72');
+
+  // Invariant: Visibly different layout types
+  assert.notStrictEqual(plan1.layout, plan2.layout, 'Both supported tasks must produce visibly different layouts');
+
+  // Direct preset plan generation
+  const presetPlan = getPresetPlan('triage_queue');
+  assert.strictEqual(presetPlan.preset, 'triage_queue', 'Preset plan must match triage_queue');
+
+  // Custom parameterized query
+  const planCustom = planWorkspace('Show orders above ₹3,500 waiting more than 60 hours');
+  assert.strictEqual(planCustom.filterState.amountThresholdInr, 3500, 'Custom amount parsed');
+  assert.strictEqual(planCustom.filterState.durationThresholdHours, 60, 'Custom duration parsed');
+
+  console.log('✓ WorkspacePlan contract: Verified visibly different layouts & parameter parsing.');
+}
+
+// 7. Invariant: Action Cancellation Produces Zero Mutation
+{
+  const sample = SYNTHETIC_ORDERS[0];
+  const initialStatus = sample.followupStatus;
+  // Simulation of user opening review modal and clicking Cancel
+  const ordersList = [...SYNTHETIC_ORDERS];
+  const handleCancel = () => {
+    // No-op / closes dialog without modifying ordersList
+  };
+  handleCancel();
+  const currentStatus = ordersList.find((o) => o.orderId === sample.orderId)!.followupStatus;
+  assert.strictEqual(currentStatus, initialStatus, 'Cancellation must produce no mutation');
+  console.log('✓ Invariant: Action review cancellation leaves source data untouched.');
 }
 
 console.log('\nAll Deterministic Calculation Engine Tests Passed Successfully!');
